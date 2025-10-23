@@ -75,81 +75,52 @@ export const useMealStore = defineStore('meal', () => {
   }
 
   async function toggleMeal(date, person) {
-    // Mise à jour optimiste IMMÉDIATE de l'interface
-    const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0]
-    const existingIndex = mealEntries.value.findIndex(
-      e => e.date && e.date.split('T')[0] === dateStr && e.person === person
-    )
-    
-    // Calculer le nouveau status localement
-    let newStatus = null
-    if (existingIndex >= 0) {
-      const currentStatus = mealEntries.value[existingIndex].status
-      if (currentStatus === null) {
-        newStatus = 'gamelle'
-      } else if (currentStatus === 'gamelle') {
-        newStatus = 'rie'
-      } else {
-        newStatus = null // sera supprimé
-      }
-    } else {
-      newStatus = 'gamelle'
-    }
-    
-    // Mise à jour immédiate de l'interface
-    if (newStatus === null) {
-      if (existingIndex >= 0) {
-        mealEntries.value.splice(existingIndex, 1)
-      }
-    } else {
-      const newEntry = {
-        user_id: 1, // temporaire, sera remplacé par la vraie réponse
-        date: dateStr,
-        person: person,
-        status: newStatus,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }
-      
-      if (existingIndex >= 0) {
-        mealEntries.value[existingIndex] = newEntry
-      } else {
-        mealEntries.value.push(newEntry)
-      }
-    }
-    
-    // Mise à jour immédiate des stats
-    updateStatsLocally()
-    
     try {
-      // Requête API en arrière-plan
+      console.log('🔄 Toggle appelé:', { date, person })
+      
+      // Requête API d'abord
       const response = await axios.post(`${API_URL}/api/meal-entries`, {
         date: date,
         person: person
       })
       
-      // Remplacer l'entrée temporaire par la vraie réponse
+      console.log('📥 Réponse API:', response.data, 'Status:', response.status)
+      
+      // Mise à jour de l'interface avec la réponse de l'API
+      const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0]
+      
       if (response.data) {
-        const finalIndex = mealEntries.value.findIndex(
+        console.log('✅ API a retourné une entrée:', response.data)
+        // L'API a retourné une entrée (créée ou modifiée)
+        const existingIndex = mealEntries.value.findIndex(
           e => e.date && e.date.split('T')[0] === dateStr && e.person === person
         )
-        if (finalIndex >= 0) {
-          mealEntries.value[finalIndex] = response.data
+        
+        console.log('🔍 Index existant:', existingIndex)
+        
+        if (existingIndex >= 0) {
+          mealEntries.value[existingIndex] = response.data
+          console.log('🔄 Entrée mise à jour')
         } else {
-          // Ajouter si pas trouvé
           mealEntries.value.push(response.data)
+          console.log('➕ Entrée ajoutée')
         }
       } else if (response.status === 204) {
-        // Supprimer seulement si l'API a explicitement retourné 204 (suppression)
-        const finalIndex = mealEntries.value.findIndex(
+        console.log('🗑️ API a supprimé l\'entrée (204)')
+        // L'API a supprimé l'entrée
+        const existingIndex = mealEntries.value.findIndex(
           e => e.date && e.date.split('T')[0] === dateStr && e.person === person
         )
-        if (finalIndex >= 0) {
-          mealEntries.value.splice(finalIndex, 1)
+        
+        if (existingIndex >= 0) {
+          mealEntries.value.splice(existingIndex, 1)
+          console.log('🗑️ Entrée supprimée de l\'interface')
         }
       }
       
-      // Recalculer les stats avec les vraies données
+      console.log('📊 Données après mise à jour:', mealEntries.value)
+      
+      // Recalculer les stats
       updateStatsLocally()
     } catch (error) {
       console.error('Erreur lors de la modification de l\'entrée:', error)
