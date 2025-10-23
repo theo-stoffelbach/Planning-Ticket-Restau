@@ -16,7 +16,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy: # <-- CORRECTION ICI
+    deploy:
       restart_policy:
         condition: on-failure
 
@@ -32,7 +32,7 @@ services:
       - tickets-network
     depends_on:
       - postgres
-    deploy: # <-- CORRECTION ICI
+    deploy:
       restart_policy:
         condition: on-failure
 
@@ -40,7 +40,7 @@ services:
     image: snakeshaderr/tickets-backend:latest
     working_dir: /var/www
     volumes:
-      - ./backend:/var/www
+      - /volume2/docker/tickets-app/backend:/var/www # Chemin absolu sur le NAS
       - /var/www/vendor
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -59,7 +59,7 @@ services:
       APP_DEBUG: ${APP_DEBUG:-true}
       APP_ENV: ${APP_ENV:-local}
     command: php artisan serve --host=0.0.0.0 --port=8000
-    deploy: # <-- CORRECTION ICI
+    deploy:
       restart_policy:
         condition: on-failure
 
@@ -67,7 +67,7 @@ services:
     image: snakeshaderr/tickets-frontend:latest
     working_dir: /app
     volumes:
-      - ./frontend:/app
+      - /volume2/docker/tickets-app/frontend:/app # Chemin absolu sur le NAS
       - /app/node_modules
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
@@ -78,7 +78,7 @@ services:
     environment:
       - VITE_API_URL=${VITE_API_URL}
     command: npm run dev -- --host
-    deploy: # <-- CORRECTION ICI
+    deploy:
       restart_policy:
         condition: on-failure
 
@@ -87,4 +87,4 @@ volumes:
 
 networks:
   tickets-network:
-    driver: overlay # <-- CORRECTION MAJEURE ICI
+    driver: overlay # <-- C'EST LA CORRECTION LA PLUS IMPORTANTE
