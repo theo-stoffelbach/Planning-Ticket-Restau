@@ -16,7 +16,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy:
+    deploy: # <-- CORRECTION ICI
       restart_policy:
         condition: on-failure
 
@@ -32,7 +32,7 @@ services:
       - tickets-network
     depends_on:
       - postgres
-    deploy:
+    deploy: # <-- CORRECTION ICI
       restart_policy:
         condition: on-failure
 
@@ -59,7 +59,7 @@ services:
       APP_DEBUG: ${APP_DEBUG:-true}
       APP_ENV: ${APP_ENV:-local}
     command: php artisan serve --host=0.0.0.0 --port=8000
-    deploy:
+    deploy: # <-- CORRECTION ICI
       restart_policy:
         condition: on-failure
 
@@ -78,7 +78,7 @@ services:
     environment:
       - VITE_API_URL=${VITE_API_URL}
     command: npm run dev -- --host
-    deploy:
+    deploy: # <-- CORRECTION ICI
       restart_policy:
         condition: on-failure
 
@@ -87,4 +87,4 @@ volumes:
 
 networks:
   tickets-network:
-    driver: overlay
+    driver: overlay # <-- CORRECTION MAJEURE ICI
