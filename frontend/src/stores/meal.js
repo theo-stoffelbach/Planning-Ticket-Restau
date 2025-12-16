@@ -132,10 +132,57 @@ export const useMealStore = defineStore('meal', () => {
 
   function getEntryStatus(date, person) {
     const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0]
-    
+
     return mealEntries.value.find(
       e => e.date && e.date.split('T')[0] === dateStr && e.person === person
     )?.status || null
+  }
+
+  async function bulkUpdate(dates, person, status) {
+    try {
+      console.log('🔄 Bulk update:', { dates, person, status })
+
+      const response = await axios.post(`${API_URL}/api/meal-entries/bulk`, {
+        dates,
+        person,
+        status
+      })
+
+      console.log('📥 Réponse bulk:', response.data)
+
+      // Mettre à jour les entrées localement
+      dates.forEach(dateStr => {
+        const existingIndex = mealEntries.value.findIndex(
+          e => e.date && e.date.split('T')[0] === dateStr && e.person === person
+        )
+
+        if (status === 'none') {
+          // Supprimer l'entrée
+          if (existingIndex >= 0) {
+            mealEntries.value.splice(existingIndex, 1)
+          }
+        } else {
+          // Trouver l'entrée dans la réponse
+          const newEntry = response.data.find(
+            e => e.date && e.date.split('T')[0] === dateStr
+          )
+
+          if (newEntry) {
+            if (existingIndex >= 0) {
+              mealEntries.value[existingIndex] = newEntry
+            } else {
+              mealEntries.value.push(newEntry)
+            }
+          }
+        }
+      })
+
+      updateStatsLocally()
+    } catch (error) {
+      console.error('Erreur bulk update:', error)
+      await fetchMonth()
+      throw error
+    }
   }
 
   function setCurrentMonth(date) {
@@ -165,6 +212,7 @@ export const useMealStore = defineStore('meal', () => {
     fetchMonth,
     fetchStats,
     toggleMeal,
+    bulkUpdate,
     getEntryStatus,
     setCurrentMonth,
     previousMonth,

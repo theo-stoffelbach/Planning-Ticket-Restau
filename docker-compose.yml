@@ -40,7 +40,7 @@ services:
     image: snakeshaderr/tickets-backend:latest
     working_dir: /var/www
     volumes:
-      - /volume2/docker/tickets-app/backend:/var/www # Chemin absolu sur le NAS
+      - ./backend:/var/www
       - /var/www/vendor
     ports:
       - "${BACKEND_PORT:-8000}:8000"
@@ -67,7 +67,7 @@ services:
     image: snakeshaderr/tickets-frontend:latest
     working_dir: /app
     volumes:
-      - /volume2/docker/tickets-app/frontend:/app # Chemin absolu sur le NAS
+      - ./frontend:/app
       - /app/node_modules
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
@@ -87,4 +87,4 @@ volumes:
 
 networks:
   tickets-network:
-    driver: overlay # <-- C'EST LA CORRECTION LA PLUS IMPORTANTE
+    driver: bridge

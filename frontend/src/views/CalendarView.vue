@@ -14,6 +14,7 @@
         :current-month="mealStore.currentMonth"
         :get-entry-status="mealStore.getEntryStatus"
         @toggle-meal="handleToggleMeal"
+        @bulk-update="handleBulkUpdate"
       />
 
       <div v-if="mealStore.loading" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -48,6 +49,15 @@ async function handleToggleMeal(date, person) {
   } catch (error) {
     console.error('Erreur lors du toggle:', error)
     alert('Erreur lors de la mise à jour')
+  }
+}
+
+async function handleBulkUpdate(dates, person, status) {
+  try {
+    await mealStore.bulkUpdate(dates, person, status)
+  } catch (error) {
+    console.error('Erreur lors du bulk update:', error)
+    alert('Erreur lors de la mise à jour multiple')
   }
 }
 

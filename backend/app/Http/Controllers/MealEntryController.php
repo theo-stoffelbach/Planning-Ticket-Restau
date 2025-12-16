@@ -39,9 +39,7 @@ class MealEntryController extends Controller
         $date = $request->date;
         $person = $request->person;
 
-        // Utiliser une requête optimisée avec select spécifique
-        $entry = MealEntry::select('id', 'status')
-            ->where('user_id', $userId)
+        $entry = MealEntry::where('user_id', $userId)
             ->where('date', $date)
             ->where('person', $person)
             ->first();
@@ -69,6 +67,48 @@ class MealEntryController extends Controller
         }
 
         return response()->json($entry);
+    }
+
+    public function bulkUpdate(Request $request)
+    {
+        $request->validate([
+            'dates' => 'required|array',
+            'dates.*' => 'date',
+            'person' => 'required|in:theo,lucas',
+            'status' => 'required|in:gamelle,rie,none',
+        ]);
+
+        $userId = $request->user()->id;
+        $dates = $request->dates;
+        $person = $request->person;
+        $status = $request->status;
+
+        $entries = [];
+
+        foreach ($dates as $date) {
+            if ($status === 'none') {
+                // Supprimer l'entrée si elle existe
+                MealEntry::where('user_id', $userId)
+                    ->where('date', $date)
+                    ->where('person', $person)
+                    ->delete();
+            } else {
+                // Créer ou mettre à jour l'entrée
+                $entry = MealEntry::updateOrCreate(
+                    [
+                        'user_id' => $userId,
+                        'date' => $date,
+                        'person' => $person,
+                    ],
+                    [
+                        'status' => $status,
+                    ]
+                );
+                $entries[] = $entry;
+            }
+        }
+
+        return response()->json($entries);
     }
 
     public function stats(Request $request)

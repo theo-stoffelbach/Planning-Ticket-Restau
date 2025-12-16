@@ -19,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Meal entries routes
     Route::get('/meal-entries', [MealEntryController::class, 'index']);
     Route::post('/meal-entries', [MealEntryController::class, 'toggle']);
+    Route::post('/meal-entries/bulk', [MealEntryController::class, 'bulkUpdate']);
     Route::get('/meal-entries/stats', [MealEntryController::class, 'stats']);
 });

@@ -3,23 +3,23 @@
     class="border rounded-lg overflow-hidden"
     :class="{
       'bg-gray-100': isWeekend,
-      'bg-white': !isWeekend
+      'bg-white': !isWeekend,
+      'ring-2 ring-blue-400': isSelected
     }"
   >
     <div class="text-center text-sm font-semibold py-1 border-b bg-gray-50">
       {{ day }}
     </div>
-    
+
     <div class="grid grid-cols-2 divide-x h-24">
       <!-- Théo -->
       <button
+        @mousedown.prevent="handleMouseDown('theo')"
+        @mouseenter="handleMouseEnter('theo')"
         @click="handleClick('theo')"
         :disabled="isWeekend"
-        class="flex flex-col items-center justify-center p-2 transition hover:bg-blue-50 disabled:cursor-not-allowed"
-        :class="{
-          'bg-green-100': theoStatus === 'gamelle',
-          'bg-orange-100': theoStatus === 'rie'
-        }"
+        class="flex flex-col items-center justify-center p-2 transition disabled:cursor-not-allowed"
+        :class="getButtonClass('theo', theoStatus)"
       >
         <span class="text-xs font-semibold text-gray-600 mb-1">Théo</span>
         <span v-if="theoStatus === 'gamelle'" class="text-2xl">🍱</span>
@@ -29,13 +29,12 @@
 
       <!-- Lucas -->
       <button
+        @mousedown.prevent="handleMouseDown('lucas')"
+        @mouseenter="handleMouseEnter('lucas')"
         @click="handleClick('lucas')"
         :disabled="isWeekend"
-        class="flex flex-col items-center justify-center p-2 transition hover:bg-purple-50 disabled:cursor-not-allowed"
-        :class="{
-          'bg-green-100': lucasStatus === 'gamelle',
-          'bg-orange-100': lucasStatus === 'rie'
-        }"
+        class="flex flex-col items-center justify-center p-2 transition disabled:cursor-not-allowed"
+        :class="getButtonClass('lucas', lucasStatus)"
       >
         <span class="text-xs font-semibold text-gray-600 mb-1">Lucas</span>
         <span v-if="lucasStatus === 'gamelle'" class="text-2xl">🍱</span>
@@ -65,20 +64,68 @@ const props = defineProps({
   lucasStatus: {
     type: String,
     default: null
+  },
+  isDragging: {
+    type: Boolean,
+    default: false
+  },
+  dragPerson: {
+    type: String,
+    default: null
+  },
+  isSelected: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['toggle'])
+const emit = defineEmits(['toggle', 'drag-start', 'drag-enter'])
 
 const isWeekend = computed(() => {
   const dayOfWeek = props.date.getDay()
-  return dayOfWeek === 0 || dayOfWeek === 6 // Dimanche ou Samedi
+  return dayOfWeek === 0 || dayOfWeek === 6
 })
 
-function handleClick(person) {
+function getButtonClass(person, status) {
+  const classes = []
+
+  // Couleur de fond selon le status
+  if (status === 'gamelle') {
+    classes.push('bg-green-100')
+  } else if (status === 'rie') {
+    classes.push('bg-orange-100')
+  }
+
+  // Hover
   if (!isWeekend.value) {
+    classes.push(person === 'theo' ? 'hover:bg-blue-50' : 'hover:bg-purple-50')
+  }
+
+  // Highlight pendant le drag si c'est la bonne personne
+  if (props.isDragging && props.dragPerson === person && props.isSelected) {
+    classes.push('ring-2 ring-inset ring-blue-500 bg-blue-100')
+  }
+
+  return classes.join(' ')
+}
+
+function handleMouseDown(person) {
+  if (!isWeekend.value) {
+    emit('drag-start', person)
+  }
+}
+
+function handleMouseEnter(person) {
+  if (props.isDragging && !isWeekend.value) {
+    emit('drag-enter', person)
+  }
+}
+
+function handleClick(person) {
+  // Le click ne se déclenche que si on n'est pas en mode drag
+  // ou si on a sélectionné un seul jour
+  if (!isWeekend.value && !props.isDragging) {
     emit('toggle', person)
   }
 }
 </script>
-
