@@ -1,0 +1,45 @@
+name: Deploy to NAS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to NAS
+    runs-on: [self-hosted, nas, planning]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy locally on NAS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fix git ownership issue
+          git config --global --add safe.directory /volume2/docker/Planning-Ticket-Restau
+
+          cd /volume2/docker/Planning-Ticket-Restau
+
+          # Configure git credentials
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+          # Pull les derniers changements
+          git fetch origin
+          git checkout main
+          git pull origin main
+
+          # Redémarrer les containers
+          docker compose pull
+          docker compose up -d
+
+          echo "Deployment completed!"
+
+      - name: Health check
+        run: |
+          sleep 10
+          docker ps | grep -E "tickets|planning" || exit 1
+          echo "Containers are running!"
