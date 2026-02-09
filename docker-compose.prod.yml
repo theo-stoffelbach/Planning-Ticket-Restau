@@ -1,6 +1,14 @@
+# =============================================================================
+# 📅 PLANNING-TICKET-RESTAU - PRODUCTION (GHCR + WATCHTOWER)
+# =============================================================================
+# Utilise les images pré-buildées depuis GHCR
+# Watchtower met à jour automatiquement les containers
+# =============================================================================
+
 services:
   postgres:
     image: postgres:15-alpine
+    container_name: planning_postgres
     environment:
       POSTGRES_DB: ${DB_DATABASE:-tickets_restau}
       POSTGRES_USER: ${DB_USERNAME:-postgres}
@@ -11,18 +19,16 @@ services:
       - postgres-data:/var/lib/postgresql/data
     networks:
       - tickets-network
-      - npm-public
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: unless-stopped
 
   pgadmin:
     image: dpage/pgadmin4:8.5
+    container_name: planning_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
@@ -31,19 +37,14 @@ services:
       - "127.0.0.1:5050:80"
     networks:
       - tickets-network
-      - npm-public
     depends_on:
       - postgres
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: unless-stopped
 
   backend:
-    image: snakeshaderr/tickets-backend:v1.0.0
+    image: ghcr.io/theo-stoffelbach/planning-tickets-backend:latest
+    container_name: planning_backend
     working_dir: /var/www
-    volumes:
-      - ./backend:/var/www
-      - /var/www/vendor
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     networks:
@@ -59,19 +60,23 @@ services:
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
       APP_KEY: ${APP_KEY}
-      APP_DEBUG: ${APP_DEBUG:-true}
-      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_ENV: ${APP_ENV:-production}
     command: php artisan serve --host=0.0.0.0 --port=8000
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   frontend:
-    image: snakeshaderr/tickets-frontend:v1.0.0
+    image: ghcr.io/theo-stoffelbach/planning-tickets-frontend:latest
+    container_name: planning_frontend
     working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     networks:
@@ -81,10 +86,15 @@ services:
       - backend
     environment:
       - VITE_API_URL=${VITE_API_URL}
-    command: npm run dev -- --host
-    deploy:
-      restart_policy:
-        condition: on-failure
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5173"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
 volumes:
   postgres-data:
