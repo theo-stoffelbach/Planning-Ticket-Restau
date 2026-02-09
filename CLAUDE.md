@@ -15,7 +15,7 @@ Ce document fournit les informations essentielles pour le développement et le d
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    Nginx Proxy Manager               │
-│         (https://tickets.theo-stoffelbach.fr)       │
+│         (https://tickets-restau.theo-stoffelbach.fr)       │
 └─────────────────────────────────────────────────────┘
                            │
                       npm-public network
@@ -120,7 +120,7 @@ Pour le déploiement GHCR, ajouter dans GitHub → Settings → Secrets:
 
 | Secret | Description |
 |--------|-------------|
-| `VITE_API_URL` | URL de l'API en production (ex: `https://api.tickets.theo-stoffelbach.fr`) |
+| `VITE_API_URL` | URL de l'API en production (ex: `https://api.tickets-restau.theo-stoffelbach.fr`) |
 
 ---
 
@@ -190,7 +190,7 @@ docker exec planning_backend php artisan db:seed
 ### Frontend
 | Champ | Valeur |
 |-------|--------|
-| Domain Names | `tickets.theo-stoffelbach.fr` |
+| Domain Names | `tickets-restau.theo-stoffelbach.fr` |
 | Scheme | `http` |
 | Forward Hostname / IP | `planning_frontend` |
 | Forward Port | `5173` |
@@ -198,7 +198,7 @@ docker exec planning_backend php artisan db:seed
 ### Backend API
 | Champ | Valeur |
 |-------|--------|
-| Domain Names | `api.tickets.theo-stoffelbach.fr` |
+| Domain Names | `api.tickets-restau.theo-stoffelbach.fr` |
 | Scheme | `http` |
 | Forward Hostname / IP | `planning_backend` |
 | Forward Port | `8000` |
@@ -245,8 +245,8 @@ docker exec -i planning_postgres psql -U postgres -d tickets_restau < backup_xxx
 
 ## 🔗 Liens utiles
 
-- **Application:** https://tickets.theo-stoffelbach.fr
-- **API:** https://api.tickets.theo-stoffelbach.fr
+- **Application:** https://tickets-restau.theo-stoffelbach.fr
+- **API:** https://api.tickets-restau.theo-stoffelbach.fr
 - **PgAdmin:** http://localhost:5050 (local only)
 - **GitHub Actions:** https://github.com/theo-stoffelbach/Planning-Ticket-Restau/actions
 
