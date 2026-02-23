@@ -11,7 +11,13 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 5173
+    port: 5173,
+    allowedHosts: [
+      'planning-ticket-restau-frontend-1',
+      'planning-ticket.theo-stoffelbach.fr',
+      'localhost',
+      '.theo-stoffelbach.fr'
+    ]
   }
 })
 
