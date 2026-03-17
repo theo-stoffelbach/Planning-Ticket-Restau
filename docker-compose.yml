@@ -2,10 +2,12 @@ services:
   postgres:
     image: postgres:15-alpine
     hostname: tickets-postgres
+    security_opt:
+      - no-new-privileges:true
     environment:
-      POSTGRES_DB: ${DB_DATABASE:-tickets_restau}
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "127.0.0.1:5433:5432"
     volumes:
@@ -25,8 +27,10 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4:8.5
+    security_opt:
+      - no-new-privileges:true
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
@@ -41,24 +45,28 @@ services:
 
   backend:
     image: snakeshaderr/tickets-backend:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    security_opt:
+      - no-new-privileges:true
     working_dir: /var/www
     volumes:
       - ./backend:/var/www
       - /var/www/vendor
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     networks:
       - tickets-network
-      - npm-public
+      - webnet
     depends_on:
       - postgres
     environment:
       DB_CONNECTION: pgsql
       DB_HOST: tickets-postgres
       DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-tickets_restau}
-      DB_USERNAME: ${DB_USERNAME:-postgres}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       APP_KEY: ${APP_KEY}
       APP_DEBUG: ${APP_DEBUG:-true}
       APP_ENV: ${APP_ENV:-local}
@@ -69,15 +77,19 @@ services:
 
   frontend:
     image: snakeshaderr/tickets-frontend:latest
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    security_opt:
+      - no-new-privileges:true
     working_dir: /app
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "3004:3000"
+      - "127.0.0.1:3004:3000"
     networks:
       - tickets-network
-      - npm-public
+      - webnet
     depends_on:
       - backend
     environment:
@@ -93,5 +105,5 @@ volumes:
 networks:
   tickets-network:
     driver: bridge
-  npm-public:
+  webnet:
     external: true
