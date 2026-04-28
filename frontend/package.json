@@ -20,7 +20,7 @@
     "@tailwindcss/postcss": "^4.2.2",
     "@vitejs/plugin-vue": "^6.0.5",
     "tailwindcss": "^4.2.2",
-    "vite": "^8.0.5",
+    "vite": "^8.0.10",
     "postcss": "^8.5.8"
   }
 }
