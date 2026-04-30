@@ -1,4 +1,5 @@
 FROM php:8.5-fpm
+# fix: ensure composer install runs correctly
 
 # Arguments
 ARG user=www
@@ -34,6 +35,9 @@ WORKDIR /var/www
 
 # Copy existing application directory
 COPY . /var/www
+
+# Install Composer dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Copy existing application directory permissions
 RUN chown -R $user:$user /var/www
