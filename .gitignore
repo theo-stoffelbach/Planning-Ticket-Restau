@@ -1,9 +1,21 @@
 # Environment
 .env
 .env.local
+.env.*
+!.env.example
 
 # Docker
 postgres-data/
+
+# Application runtime files
+backend/storage/logs/*.log
+backend/storage/framework/views/*.php
+backend/storage/framework/cache/
+backend/storage/framework/sessions/
+
+# Dependencies
+vendor/
+node_modules/
 
 # OS
 .DS_Store

@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   pgadmin:
-    image: dpage/pgadmin4:8.5
+    image: dpage/pgadmin4:8.14
     container_name: planning_pgadmin
     security_opt:
       - no-new-privileges:true
@@ -83,6 +83,11 @@ services:
       APP_KEY: ${APP_KEY}
       APP_DEBUG: ${APP_DEBUG:-false}
       APP_ENV: ${APP_ENV:-production}
+      SESSION_DRIVER: ${SESSION_DRIVER:-cookie}
+      SESSION_DOMAIN: ${SESSION_DOMAIN:-.theo-stoffelbach.fr}
+      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-true}
+      SESSION_SAME_SITE: ${SESSION_SAME_SITE:-lax}
+      SANCTUM_STATEFUL_DOMAINS: ${SANCTUM_STATEFUL_DOMAINS:-tickets-restau.theo-stoffelbach.fr}
     command: php artisan serve --host=0.0.0.0 --port=8000
     restart: unless-stopped
     healthcheck:

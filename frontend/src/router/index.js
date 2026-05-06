@@ -31,9 +31,9 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
-  // Vérifier l'authentification si un token existe
-  if (authStore.token && !authStore.user) {
+
+  // Vérifier l'authentification si l'utilisateur n'est pas encore chargé
+  if (!authStore.user) {
     await authStore.checkAuth()
   }
 
