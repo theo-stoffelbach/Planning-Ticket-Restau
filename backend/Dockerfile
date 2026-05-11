@@ -6,7 +6,7 @@ ARG user=www
 ARG uid=1000
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     git \
     curl \
     libpng-dev \
@@ -47,4 +47,3 @@ USER $user
 
 # Expose port 8000
 EXPOSE 8000
-
