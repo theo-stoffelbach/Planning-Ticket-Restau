@@ -97,8 +97,7 @@ services:
       retries: 3
       start_period: 30s
     labels:
-      # Temporaire: image locale corrigee. Reactiver apres push GHCR du composer.lock.
-      - "com.centurylinklabs.watchtower.enable=false"
+      - "com.centurylinklabs.watchtower.enable=true"
 
   frontend:
     image: ghcr.io/theo-stoffelbach/planning-tickets-frontend:latest
