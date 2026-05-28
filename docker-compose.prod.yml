@@ -7,7 +7,7 @@
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: nas-sec/postgres:15.17-alpine3.23-suexec
     container_name: planning_postgres
     security_opt:
       - no-new-privileges:true
@@ -34,7 +34,7 @@ services:
     restart: unless-stopped
 
   pgadmin:
-    image: dpage/pgadmin4:8.14
+    image: nas-sec/pgadmin4:9.14-apkfix
     container_name: planning_pgadmin
     security_opt:
       - no-new-privileges:true
@@ -91,13 +91,14 @@ services:
     command: php artisan serve --host=0.0.0.0 --port=8000
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/up"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8000/up"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
     labels:
-      - "com.centurylinklabs.watchtower.enable=true"
+      # Temporaire: image locale corrigee. Reactiver apres push GHCR du composer.lock.
+      - "com.centurylinklabs.watchtower.enable=false"
 
   frontend:
     image: ghcr.io/theo-stoffelbach/planning-tickets-frontend:latest

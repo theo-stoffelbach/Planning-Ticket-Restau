@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: nas-sec/postgres:15.17-alpine3.23-suexec
     hostname: tickets-postgres
     security_opt:
       - no-new-privileges:true
@@ -26,7 +26,7 @@ services:
         condition: on-failure
 
   pgadmin:
-    image: dpage/pgadmin4:8.14
+    image: dpage/pgadmin4:9.15
     security_opt:
       - no-new-privileges:true
     environment:
