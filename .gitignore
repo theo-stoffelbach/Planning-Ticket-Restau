@@ -12,6 +12,7 @@ backend/storage/logs/*.log
 backend/storage/framework/views/*.php
 backend/storage/framework/cache/
 backend/storage/framework/sessions/
+backend/public/build/
 
 # Dependencies
 vendor/
